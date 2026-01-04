@@ -5,7 +5,7 @@ import json
 # Configuration de la page
 st.set_page_config(
     page_title="AHMED SEFDINE - Data Analyst",
-    page_icon="📊",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -439,7 +439,7 @@ with col2:
 
 # Navigation par onglets
 st.markdown("---")
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Expérience", "🎓 Formation", "🛠️ Compétences", "🚀 Projets"])
+tab1, tab2, tab3, tab4 = st.tabs(["Expérience", "Formation", "Compétences", "Projets"])
 
 # Onglet 1: Expérience
 with tab1:
@@ -566,7 +566,7 @@ with col3:
     <div class="contact-info">
         <h3>📍 Localisation</h3>
         <p>{PROFILE_DATA['location']}</p>
-        <p style="margin-top: 1rem;">🌍 Ouvert aux opportunités à distance</p>
+        <p style="margin-top: 1rem;">Ouvert aux opportunités à distance</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -588,6 +588,6 @@ st.markdown(f"""
 <div style="text-align: center; color: #6B7280; padding: 2rem;">
     <p>© {datetime.now().year} {PROFILE_DATA['name']} - Portfolio Data Analyst</p>
     <p>Dernière mise à jour : {datetime.now().strftime("%d/%m/%Y")}</p>
-    <p style="font-size: 0.9rem; margin-top: 1rem;">📊 Passionné par la data, les statistiques et l'analyse décisionnelle</p>
+    <p style="font-size: 0.9rem; margin-top: 1rem;">Passionné par la data, les statistiques et l'analyse décisionnelle</p>
 </div>
 """, unsafe_allow_html=True)
