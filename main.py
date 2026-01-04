@@ -1,8 +1,6 @@
 import streamlit as st
-import requests
-import json
 from datetime import datetime
-import time
+import json
 
 # Configuration de la page
 st.set_page_config(
@@ -12,8 +10,176 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Variables d'API
-API_BASE_URL = "http://localhost:5000/api"  # À modifier pour la production
+# Données statiques du profil
+PROFILE_DATA = {
+    "id": 1,
+    "name": "AHMED SEFDINE",
+    "title": "Data Analyst",
+    "bio": "Jeune diplômé en statistique et informatique décisionnelle, avec une expérience en analyse de données, statistiques appliquées, SQL et Business Intelligence. Compétences en Python, Power BI et reporting décisionnel. Intéressé par des postes de Data Analyst / BI Junior.",
+    "email": "ahmed.sefdine@uadb.edu.sn",
+    "phone": "+221 77 808 09 42",
+    "location": "Dakar, Sénégal",
+    "socialLinks": [
+        {"url": "https://www.linkedin.com/in/sefdineahmed/", "icon": "🔗", "platform": "LinkedIn"},
+        {"url": "https://github.com/sefdineahmed", "icon": "💻", "platform": "GitHub"}
+    ],
+    "avatarUrl": None
+}
+
+EDUCATION_DATA = [
+    {
+        "id": 4,
+        "degree": "Baccalauréat Scientifique (TD)",
+        "institution": "École Privée Communautaire Franco Arabe de Dimani",
+        "location": "Ntsoralé, Comores",
+        "period": "2016 – 2017"
+    },
+    {
+        "id": 3,
+        "degree": "Diplôme Universitaire de Technologie, Statistique",
+        "institution": "Université des Comores",
+        "location": "Moroni, Comores",
+        "period": "2017 – 2019"
+    },
+    {
+        "id": 2,
+        "degree": "Licence Pro, Mathématique, Statistique et Informatique Décisionnelle",
+        "institution": "Université des Comores",
+        "location": "Moroni, Comores",
+        "period": "2019 – 2020"
+    },
+    {
+        "id": 1,
+        "degree": "Master II, Statistique et informatique décisionnelle",
+        "institution": "Université Alioune Diop",
+        "location": "Bambey, Sénégal",
+        "period": "2022 – 2025"
+    }
+]
+
+EXPERIENCE_DATA = [
+    {
+        "id": 4,
+        "title": "Analyste de Données Aériennes (Stage)",
+        "company": "Agence Nationale de l'Aviation Civile et de la Météorologie",
+        "location": "Moroni, Comores",
+        "period": "juil. 2019 – sept. 2019",
+        "description": [
+            "Analyse descriptive du trafic aérien (2005–2017)",
+            "Visualisation et synthèse des indicateurs clés"
+        ]
+    },
+    {
+        "id": 3,
+        "title": "Assistant Statistique (Stage)",
+        "company": "Institut National de Statistique des Études Économiques et Démographiques",
+        "location": "Moroni, Comores",
+        "period": "mai 2021 – déc. 2021",
+        "description": [
+            "Collecte, traitement et analyse des données relatives aux indices des prix",
+            "Rédaction de rapports trimestriels et présentation des résultats",
+            "Participation à l'amélioration des méthodologies de collecte"
+        ]
+    },
+    {
+        "id": 2,
+        "title": "Data Analyst - Modélisation de Survie (Stage)",
+        "company": "Hôpital Aristide Le Dantec",
+        "location": "Dakar, Sénégal",
+        "period": "déc. 2024 – avr. 2025",
+        "description": [
+            "Analyse de survie sur des données de patients atteints de cancer de l'estomac",
+            "Modélisation statistique (Kaplan-Meier, Cox)",
+            "Implémentation de modèles ML (Random Survival Forest, Deep Survival)",
+            "Comparaison des performances et aide à la décision"
+        ]
+    },
+    {
+        "id": 1,
+        "title": "Analyste de Données Junior (Stage)",
+        "company": "Agence Nationale de Statistique et Démographique",
+        "location": "Diourbel, Sénégal",
+        "period": "oct. 2025 – aujourd'hui",
+        "description": [
+            "Collecte, nettoyage et traitement de données économiques et sociales",
+            "Contribution à la rédaction du Rapport sur la Situation Économique et Sociale 2024",
+            "Centralisation et consolidation des données issues des services sectoriels",
+            "Mise à jour de maquettes statistiques"
+        ]
+    }
+]
+
+SKILLS_DATA = [
+    {
+        "id": 1,
+        "category": "Languages & Tools",
+        "items": [
+            "Python (pandas, numpy, matplotlib, seaborn, scikit-learn)",
+            "SQL (PostgreSQL, MySQL)",
+            "Power BI",
+            "KoboToolbox",
+            "Talend Open Studio (ETL)",
+            "LaTeX",
+            "SPSS",
+            "Excel",
+            "Access"
+        ]
+    },
+    {
+        "id": 2,
+        "category": "Data & Analysis",
+        "items": [
+            "Data Cleaning",
+            "Statistical Modeling",
+            "Machine Learning",
+            "Reporting",
+            "Business Intelligence",
+            "KPIs"
+        ]
+    },
+    {
+        "id": 3,
+        "category": "Soft Skills",
+        "items": [
+            "Curiosité Intellectuelle",
+            "Résolution de Problème",
+            "Sens Produit",
+            "Communication"
+        ]
+    },
+    {
+        "id": 4,
+        "category": "Languages",
+        "items": [
+            "Français (Courant)",
+            "Anglais (Intermédiaire)"
+        ]
+    }
+]
+
+PROJECTS_DATA = [
+    {
+        "titre": "Analyse de Survie - Cancer de l'Estomac",
+        "description": "Modélisation statistique de la survie des patients avec Kaplan-Meier, Cox et Random Survival Forest",
+        "technologies": ["Python", "scikit-survival", "pandas", "matplotlib", "seaborn"],
+        "periode": "2024-2025",
+        "details": "Analyse de données médicales pour prédire la survie des patients et identifier les facteurs de risque significatifs."
+    },
+    {
+        "titre": "Dashboard Business Intelligence - Trafic Aérien",
+        "description": "Visualisation des indicateurs clés du trafic aérien sur 12 ans",
+        "technologies": ["Power BI", "SQL", "Excel"],
+        "periode": "2019",
+        "details": "Création d'un tableau de bord interactif pour l'analyse du trafic aérien et la prise de décision stratégique."
+    },
+    {
+        "titre": "Système de Suivi des Indices des Prix",
+        "description": "Collecte et analyse des données d'inflation pour rapports trimestriels",
+        "technologies": ["Python", "SQL", "KoboToolbox", "Talend"],
+        "periode": "2021",
+        "details": "Automatisation du processus de collecte et d'analyse des données des indices des prix à la consommation."
+    }
+]
 
 # Style CSS personnalisé
 st.markdown("""
@@ -23,6 +189,7 @@ st.markdown("""
         color: #1E3A8A;
         font-weight: 700;
         margin-bottom: 0.5rem;
+        padding-top: 1rem;
     }
     
     .sub-header {
@@ -55,315 +222,372 @@ st.markdown("""
         border-radius: 8px;
         padding: 1rem;
         margin-bottom: 1rem;
+        border: 1px solid #DBEAFE;
     }
     
     .contact-info {
         background-color: #F0F9FF;
         border-radius: 10px;
-        padding: 1rem;
+        padding: 1.5rem;
         margin: 1rem 0;
+        text-align: center;
+        border: 1px solid #BAE6FD;
     }
     
-    .social-icon {
-        font-size: 1.5rem;
-        margin-right: 10px;
-        color: #3B82F6;
+    .social-link {
+        display: inline-block;
+        background-color: #3B82F6;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        margin: 0.5rem;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    
+    .social-link:hover {
+        background-color: #2563EB;
+        color: white;
+        text-decoration: none;
     }
     
     .experience-period {
         color: #6B7280;
         font-style: italic;
         font-size: 0.9rem;
+        background-color: #F3F4F6;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        display: inline-block;
     }
     
-    /* Ajout pour éviter les conflits de rendu */
-    .stApp {
-        overflow-x: hidden;
+    .tech-badge {
+        display: inline-block;
+        background-color: #E0F2FE;
+        color: #0369A1;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        margin: 0.2rem;
+        font-size: 0.9rem;
+        font-weight: 500;
     }
     
-    /* Correction pour les transitions */
-    [data-testid="stVerticalBlock"] {
-        transition: none !important;
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2rem;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: #F8FAFC;
+        border-radius: 5px 5px 0px 0px;
+        gap: 1rem;
+        padding: 10px 16px;
+    }
+    
+    .download-btn {
+        background-color: #10B981;
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+    
+    .download-btn:hover {
+        background-color: #059669;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Fonctions pour récupérer les données depuis l'API avec retry
-@st.cache_data(ttl=3600, show_spinner="Chargement des données...")
-def fetch_data(endpoint):
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(f"{API_BASE_URL}/{endpoint}", timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            if attempt < max_retries - 1:
-                time.sleep(1)
-                continue
-            st.error(f"Erreur lors de la récupération des données {endpoint}: {e}")
-            return None
-    return None
+# Initialisation de session state
+if 'active_tab' not in st.session_state:
+    st.session_state.active_tab = "Accueil"
 
-# Initialisation de session state pour stocker les données
-if 'data_loaded' not in st.session_state:
-    st.session_state.data_loaded = False
-    st.session_state.profile = None
-    st.session_state.education = None
-    st.session_state.experience = None
-    st.session_state.skills = None
+# Fonction pour générer un CV PDF (simulé)
+def generate_cv_pdf():
+    # Cette fonction simule la génération d'un CV PDF
+    # En production, vous pourriez utiliser ReportLab ou WeasyPrint
+    st.success("✅ CV généré avec succès! (Fonctionnalité de téléchargement)")
+    
+    # Créer un faux PDF (texte pour l'exemple)
+    cv_content = f"""
+    CV - {PROFILE_DATA['name']}
+    =============================
+    
+    Titre: {PROFILE_DATA['title']}
+    Email: {PROFILE_DATA['email']}
+    Téléphone: {PROFILE_DATA['phone']}
+    Localisation: {PROFILE_DATA['location']}
+    
+    PROFIL
+    ------
+    {PROFILE_DATA['bio']}
+    
+    EXPÉRIENCE PROFESSIONNELLE
+    --------------------------
+    """
+    
+    for exp in EXPERIENCE_DATA:
+        cv_content += f"""
+    {exp['title']}
+    {exp['company']} - {exp['location']} ({exp['period']})
+    """
+        for desc in exp['description']:
+            cv_content += f"    • {desc}\n"
+    
+    return cv_content
 
-# Chargement des données avec un spinner
-with st.spinner("Chargement du portfolio..."):
-    if not st.session_state.data_loaded:
-        st.session_state.profile = fetch_data("profile")
-        st.session_state.education = fetch_data("education")
-        st.session_state.experience = fetch_data("experience")
-        st.session_state.skills = fetch_data("skills")
-        st.session_state.data_loaded = True
-
-# Assignation des variables
-profile = st.session_state.profile
-education = st.session_state.education
-experience = st.session_state.experience
-skills = st.session_state.skills
-
-# Sidebar - Utiliser un conteneur pour isoler
+# Sidebar
 with st.sidebar:
-    sidebar_container = st.container()
-    with sidebar_container:
-        # Ajout d'un placeholder pour éviter les conflits
-        col_img, _ = st.columns([1, 1])
-        with col_img:
-            st.markdown('<div style="text-align: center;">', unsafe_allow_html=True)
-            st.image("https://img.icons8.com/fluency/96/000000/user-male-circle.png", 
-                    width=150)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        if profile:
-            st.markdown(f"## {profile.get('name', 'AHMED SEFDINE')}")
-            st.markdown(f"### {profile.get('title', 'Data Analyst')}")
-            st.markdown(f"📍 {profile.get('location', 'Dakar, Sénégal')}")
-        
-        st.markdown("---")
-        
-        # Informations de contact
-        if profile:
-            st.markdown("### 📞 Contact")
-            st.markdown(f"**Email:** {profile.get('email')}")
-            st.markdown(f"**Téléphone:** {profile.get('phone')}")
-            
-            # Liens sociaux
-            st.markdown("### 🔗 Réseaux")
-            for link in profile.get('socialLinks', []):
-                st.markdown(f"[{link['icon']} {link['platform']}]({link['url']})")
-        
-        st.markdown("---")
-        st.markdown("### 📊 Compétences clés")
-        if skills:
-            for skill_category in skills[:2]:  # Limiter à 2 catégories dans la sidebar
-                st.markdown(f"**{skill_category['category']}**")
-                for item in skill_category['items'][:3]:  # Limiter à 3 items par catégorie
-                    st.markdown(f"• {item}")
-
-# Contenu principal - Utiliser des conteneurs pour structurer
-main_container = st.container()
-with main_container:
-    # En-tête principal
-    if profile:
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.markdown(f'<h1 class="main-header">{profile.get("name")}</h1>', unsafe_allow_html=True)
-            st.markdown(f'<h2 class="sub-header">{profile.get("title")}</h2>', unsafe_allow_html=True)
-            
-            # Bio
-            st.markdown("### À propos")
-            bio_container = st.container()
-            with bio_container:
-                st.write(profile.get("bio", ""))
-        
-        with col2:
-            avatar_container = st.container()
-            with avatar_container:
-                st.image("https://img.icons8.com/fluency/240/000000/user-male-circle.png", 
-                        caption="AHMED SEFDINE", width=200)
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0;">
+        <div style="background: linear-gradient(135deg, #3B82F6, #1D4ED8); 
+                    width: 150px; 
+                    height: 150px; 
+                    border-radius: 50%; 
+                    margin: 0 auto 1rem auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 3rem;
+                    color: white;">
+            AS
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Sections principales avec des conteneurs individuels
-    tabs_container = st.container()
-    with tabs_container:
-        # Utiliser st.tabs() seulement une fois
-        tab_names = ["📈 Expérience", "🎓 Formation", "🛠️ Compétences", "📂 Projets"]
-        tabs = st.tabs(tab_names)
-        
-        # Onglet Expérience
-        with tabs[0]:
-            if experience:
-                exp_container = st.container()
-                with exp_container:
-                    st.markdown('<h2 class="section-title">Expérience Professionnelle</h2>', unsafe_allow_html=True)
-                    
-                    for exp in experience:
-                        exp_item = st.container()
-                        with exp_item:
-                            col1, col2 = st.columns([3, 1])
-                            with col1:
-                                st.markdown(f"### {exp['title']}")
-                                st.markdown(f"**{exp['company']}** - {exp['location']}")
-                                
-                                # Description sous forme de liste
-                                for desc in exp['description']:
-                                    st.markdown(f"• {desc}")
-                            
-                            with col2:
-                                st.markdown(f'<p class="experience-period">{exp["period"]}</p>', unsafe_allow_html=True)
-                            
-                            st.markdown("---")
-        
-        # Onglet Formation
-        with tabs[1]:
-            if education:
-                edu_container = st.container()
-                with edu_container:
-                    st.markdown('<h2 class="section-title">Formation Académique</h2>', unsafe_allow_html=True)
-                    
-                    for edu in education:
-                        edu_item = st.container()
-                        with edu_item:
-                            st.markdown(f"""
-                            <div class="card">
-                                <h3>{edu['degree']}</h3>
-                                <p><strong>{edu['institution']}</strong> - {edu['location']}</p>
-                                <p><em>{edu['period']}</em></p>
-                            </div>
-                            """, unsafe_allow_html=True)
-        
-        # Onglet Compétences
-        with tabs[2]:
-            if skills:
-                skills_container = st.container()
-                with skills_container:
-                    st.markdown('<h2 class="section-title">Compétences Techniques</h2>', unsafe_allow_html=True)
-                    
-                    # Utiliser des colonnes stables
-                    cols = st.columns(2)
-                    for idx, skill_category in enumerate(skills):
-                        with cols[idx % 2]:
-                            cat_container = st.container()
-                            with cat_container:
-                                st.markdown(f"""
-                                <div class="skill-category">
-                                    <h4>{skill_category['category']}</h4>
-                                </div>
-                                """, unsafe_allow_html=True)
-                                
-                                for item in skill_category['items']:
-                                    st.markdown(f"• **{item}**")
-        
-        # Onglet Projets
-        with tabs[3]:
-            projets_container = st.container()
-            with projets_container:
-                st.markdown('<h2 class="section-title">Projets Data Analysis</h2>', unsafe_allow_html=True)
-                
-                # Exemples de projets
-                projets = [
-                    {
-                        "titre": "Analyse de Survie - Cancer de l'Estomac",
-                        "description": "Modélisation statistique de la survie des patients avec Kaplan-Meier, Cox et Random Survival Forest",
-                        "technologies": ["Python", "scikit-survival", "pandas", "matplotlib"],
-                        "periode": "2024-2025"
-                    },
-                    {
-                        "titre": "Dashboard Business Intelligence - Trafic Aérien",
-                        "description": "Visualisation des indicateurs clés du trafic aérien sur 12 ans",
-                        "technologies": ["Power BI", "SQL", "Excel"],
-                        "periode": "2019"
-                    },
-                    {
-                        "titre": "Système de Suivi des Indices des Prix",
-                        "description": "Collecte et analyse des données d'inflation pour rapports trimestriels",
-                        "technologies": ["Python", "SQL", "KoboToolbox", "Talend"],
-                        "periode": "2021"
-                    }
-                ]
-                
-                for projet in projets:
-                    with st.expander(f"{projet['titre']} ({projet['periode']})"):
-                        st.markdown(f"**Description:** {projet['description']}")
-                        st.markdown("**Technologies utilisées:**")
-                        # Utiliser st.columns de manière stable
-                        tech_text = " ".join([f"`{tech}` " for tech in projet['technologies']])
-                        st.markdown(tech_text)
-
-# Section de contact
-contact_container = st.container()
-with contact_container:
+    st.markdown(f"## {PROFILE_DATA['name']}")
+    st.markdown(f"### {PROFILE_DATA['title']}")
+    st.markdown(f"📍 **{PROFILE_DATA['location']}**")
+    
     st.markdown("---")
-    st.markdown('<h2 class="section-title">Contactez-moi</h2>', unsafe_allow_html=True)
     
-    if profile:
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            contact_item = st.container()
-            with contact_item:
-                st.markdown("""
-                <div class="contact-info">
-                    <h4>📧 Email</h4>
-                    <p>{email}</p>
-                </div>
-                """.format(email=profile.get('email')), unsafe_allow_html=True)
-        
-        with col2:
-            contact_item = st.container()
-            with contact_item:
-                st.markdown("""
-                <div class="contact-info">
-                    <h4>📱 Téléphone</h4>
-                    <p>{phone}</p>
-                </div>
-                """.format(phone=profile.get('phone')), unsafe_allow_html=True)
-        
-        with col3:
-            contact_item = st.container()
-            with contact_item:
-                st.markdown("""
-                <div class="contact-info">
-                    <h4>📍 Localisation</h4>
-                    <p>{location}</p>
-                </div>
-                """.format(location=profile.get('location')), unsafe_allow_html=True)
+    # Téléchargement CV
+    st.markdown("### 📄 Télécharger CV")
+    if st.button("📥 Télécharger mon CV", use_container_width=True):
+        cv_content = generate_cv_pdf()
+        st.download_button(
+            label="⬇️ Cliquer pour télécharger",
+            data=cv_content,
+            file_name="CV_AHMED_SEFDINE_Data_Analyst.pdf",
+            mime="application/pdf"
+        )
+    
+    st.markdown("---")
+    
+    # Liens sociaux
+    st.markdown("### 🌐 Me suivre")
+    for link in PROFILE_DATA['socialLinks']:
+        st.markdown(f"""
+        <a href="{link['url']}" target="_blank" class="social-link">
+            {link['icon']} {link['platform']}
+        </a>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Compétences clés (résumé)
+    st.markdown("### 💡 Compétences clés")
+    key_skills = [
+        "Python & Data Science",
+        "SQL & Databases", 
+        "Power BI & DataViz",
+        "Statistical Analysis",
+        "Machine Learning",
+        "Business Intelligence"
+    ]
+    
+    for skill in key_skills:
+        st.markdown(f"✅ **{skill}**")
+
+# Contenu principal
+# En-tête
+col1, col2 = st.columns([3, 1])
+with col1:
+    st.markdown(f'<h1 class="main-header">{PROFILE_DATA["name"]}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h2 class="sub-header">{PROFILE_DATA["title"]}</h2>', unsafe_allow_html=True)
+    
+    # Bio
+    st.markdown("### 👋 À propos de moi")
+    st.markdown(f'<div class="card">{PROFILE_DATA["bio"]}</div>', unsafe_allow_html=True)
+
+with col2:
+    # Badge de disponibilité
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #10B981, #059669); 
+                color: white; 
+                padding: 1rem; 
+                border-radius: 10px; 
+                text-align: center;
+                margin-top: 2rem;">
+        <h3 style="margin: 0;">📅 Disponible</h3>
+        <p style="margin: 0.5rem 0 0 0;">Pour des opportunités en Data Analysis</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Contact rapide
+    st.markdown("""
+    <div style="margin-top: 2rem;">
+        <h4>📬 Contact rapide</h4>
+        <p><strong>Email:</strong><br>{email}</p>
+        <p><strong>Téléphone:</strong><br>{phone}</p>
+    </div>
+    """.format(email=PROFILE_DATA['email'], phone=PROFILE_DATA['phone']), unsafe_allow_html=True)
+
+# Navigation par onglets
+st.markdown("---")
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Expérience", "🎓 Formation", "🛠️ Compétences", "🚀 Projets"])
+
+# Onglet 1: Expérience
+with tab1:
+    st.markdown('<h2 class="section-title">Expérience Professionnelle</h2>', unsafe_allow_html=True)
+    
+    for exp in EXPERIENCE_DATA:
+        with st.container():
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                st.markdown(f"### {exp['title']}")
+                st.markdown(f"**🏢 {exp['company']}** • 📍 {exp['location']}")
+                
+                # Description
+                for desc in exp['description']:
+                    st.markdown(f"• {desc}")
+            
+            with col2:
+                st.markdown(f'<div class="experience-period">{exp["period"]}</div>', unsafe_allow_html=True)
+            
+            st.markdown("---")
+
+# Onglet 2: Formation
+with tab2:
+    st.markdown('<h2 class="section-title">Parcours Académique</h2>', unsafe_allow_html=True)
+    
+    for edu in EDUCATION_DATA:
+        with st.container():
+            st.markdown(f"""
+            <div class="card">
+                <h3>🎓 {edu['degree']}</h3>
+                <p><strong>🏛️ {edu['institution']}</strong></p>
+                <p>📍 {edu['location']}</p>
+                <p><em>📅 {edu['period']}</em></p>
+            </div>
+            """, unsafe_allow_html=True)
+
+# Onglet 3: Compétences
+with tab3:
+    st.markdown('<h2 class="section-title">Compétences Techniques</h2>', unsafe_allow_html=True)
+    
+    cols = st.columns(2)
+    
+    with cols[0]:
+        for skill_cat in SKILLS_DATA[:2]:  # Languages & Tools, Data & Analysis
+            st.markdown(f"""
+            <div class="skill-category">
+                <h4>🔧 {skill_cat['category']}</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            for item in skill_cat['items']:
+                st.markdown(f"• **{item}**")
+    
+    with cols[1]:
+        for skill_cat in SKILLS_DATA[2:]:  # Soft Skills, Languages
+            st.markdown(f"""
+            <div class="skill-category">
+                <h4>🌟 {skill_cat['category']}</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            for item in skill_cat['items']:
+                st.markdown(f"• **{item}**")
+    
+    # Graphique des compétences (simulé)
+    st.markdown("### 📈 Niveau de compétences")
+    skills_chart = {
+        "Python Data Science": 90,
+        "SQL & Bases de données": 85,
+        "Power BI & DataViz": 80,
+        "Statistiques": 85,
+        "Machine Learning": 75,
+        "Business Intelligence": 80
+    }
+    
+    for skill, level in skills_chart.items():
+        st.markdown(f"**{skill}**")
+        st.progress(level/100)
+        st.markdown(f"{level}%")
+
+# Onglet 4: Projets
+with tab4:
+    st.markdown('<h2 class="section-title">Projets Data Analysis</h2>', unsafe_allow_html=True)
+    
+    for projet in PROJECTS_DATA:
+        with st.expander(f"**{projet['titre']}** ({projet['periode']})", expanded=False):
+            st.markdown(f"**Description:** {projet['description']}")
+            st.markdown(f"**Détails:** {projet['details']}")
+            
+            st.markdown("**Technologies utilisées:**")
+            col_techs = st.columns(4)
+            for idx, tech in enumerate(projet['technologies']):
+                with col_techs[idx % 4]:
+                    st.markdown(f'<span class="tech-badge">{tech}</span>', unsafe_allow_html=True)
+
+# Section Contact
+st.markdown("---")
+st.markdown('<h2 class="section-title">📬 Contactez-moi</h2>', unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown(f"""
+    <div class="contact-info">
+        <h3>📧 Email</h3>
+        <p>{PROFILE_DATA['email']}</p>
+        <a href="mailto:{PROFILE_DATA['email']}" class="social-link" style="margin-top: 1rem;">
+            ✉️ Envoyer un email
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown(f"""
+    <div class="contact-info">
+        <h3>📱 Téléphone</h3>
+        <p>{PROFILE_DATA['phone']}</p>
+        <a href="tel:{PROFILE_DATA['phone'].replace(' ', '')}" class="social-link" style="margin-top: 1rem;">
+            📞 Appeler
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown(f"""
+    <div class="contact-info">
+        <h3>📍 Localisation</h3>
+        <p>{PROFILE_DATA['location']}</p>
+        <p style="margin-top: 1rem;">🌍 Ouvert aux opportunités à distance</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Formulaire de contact
+st.markdown("### 💬 Envoyez-moi un message")
+contact_form = """
+<form action="https://formspree.io/f/{votre-form-id}" method="POST">
+    <input type="hidden" name="_subject" value="Nouveau contact depuis le portfolio">
+    <input type="text" name="name" placeholder="Votre nom" required style="width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc;">
+    <input type="email" name="email" placeholder="Votre email" required style="width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc;">
+    <textarea name="message" placeholder="Votre message" rows="4" required style="width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc;"></textarea>
+    <button type="submit" style="background-color: #3B82F6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Envoyer</button>
+</form>
+"""
 
 # Pied de page
-footer_container = st.container()
-with footer_container:
-    st.markdown("---")
-    st.markdown("""
-    <div style="text-align: center; color: #6B7280; padding: 2rem;">
-        <p>© 2024 AHMED SEFDINE - Portfolio Data Analyst</p>
-        <p>Dernière mise à jour : {date}</p>
-    </div>
-    """.format(date=datetime.now().strftime("%d/%m/%Y")), unsafe_allow_html=True)
-
-# Ajout d'un script JavaScript pour stabiliser le DOM
-st.markdown("""
-<script>
-    // Prévenir les conflits de rendu
-    document.addEventListener('DOMContentLoaded', function() {
-        // Désactiver les transitions problématiques
-        const style = document.createElement('style');
-        style.textContent = `
-            * {
-                transition: none !important;
-                animation: none !important;
-            }
-        `;
-        document.head.appendChild(style);
-    });
-</script>
+st.markdown("---")
+st.markdown(f"""
+<div style="text-align: center; color: #6B7280; padding: 2rem;">
+    <p>© {datetime.now().year} {PROFILE_DATA['name']} - Portfolio Data Analyst</p>
+    <p>Dernière mise à jour : {datetime.now().strftime("%d/%m/%Y")}</p>
+    <p style="font-size: 0.9rem; margin-top: 1rem;">📊 Passionné par la data, les statistiques et l'analyse décisionnelle</p>
+</div>
 """, unsafe_allow_html=True)
-
-# Message de débogage (optionnel - à désactiver en production)
-# st.sidebar.markdown("---")
-# st.sidebar.markdown("**État de l'application:**")
-# st.sidebar.markdown(f"Données chargées: {st.session_state.data_loaded}")
